@@ -21,33 +21,38 @@ uint16_t calc_crc(uint8_t *arr, uint8_t length)
 //------------------------------------------------------------------------------
 uint8_t process_net_packet(ComMessage* inPack, ComMessage* outPack)
 {
+  //MODBUS_HR[MBHR_DISCRETE_OUTPUTS_LOW] = MODBUS_HR[MBHR_DISCRETE_OUTPUTS_LOW]+1;
   if(inPack->data[0] != MODBUS_HR[MBHR_MY_MBADDR] && inPack->data[0] != MB_BROADCAST_ADDR)
     return MODBUS_PACKET_WRONG_ADDR;
   uint16_t tmpCRC = calc_crc(inPack->data, inPack->length - 2);
-  if(tmpCRC != (inPack->data[inPack->length - 1]|(inPack->data[inPack->length - 2] << 8)))
+  if(tmpCRC != *(uint16_t*)&inPack->data[inPack->length - 2])
      return MODBUS_PACKET_WRONG_CRC;
+  MODBUS_HR[MBHR_DISCRETE_OUTPUTS_LOW] = MODBUS_HR[MBHR_DISCRETE_INPUTS_LOW]+1;
   analise_modbus(inPack, outPack);
   tmpCRC = calc_crc(outPack->data, outPack->length);
-  *(uint16_t*)&outPack->data[outPack->length] = SWAP16(tmpCRC);
+  *(uint16_t*)&outPack->data[outPack->length] = tmpCRC;
   outPack->length += 2;
   return MODBUS_PACKET_VALID_AND_PROCESSED;
 }
 //------------------------------------------------------------------------------
-//=== Анализ Modbus-команды ===//
+//=== РђРЅР°Р»РёР· Modbus-РєРѕРјР°РЅРґС‹ ===//
 void analise_modbus(ComMessage* inPack, ComMessage* outPack)
 {
   outPack->data[0] = inPack->data[0];
   outPack->data[1] = inPack->data[1];
   switch(inPack->data[1])
-  {		// Байт команды.
-  case 3:		// <03> Чтение регистров хранения.
-  case 4:		// <04> Чтение входных регистров.
+  {		// Р‘Р°Р№С‚ РєРѕРјР°РЅРґС‹.
+  case 3:		// <03> Р§С‚РµРЅРёРµ СЂРµРіРёСЃС‚СЂРѕРІ С…СЂР°РЅРµРЅРёСЏ.
+  case 4:		// <04> Р§С‚РµРЅРёРµ РІС…РѕРґРЅС‹С… СЂРµРіРёСЃС‚СЂРѕРІ.
     CmdModbus_03_04(inPack, outPack);
     break;
-  case 6:		// <06> Запись одного регистра хранения.
+  case 6:		// <06> Р—Р°РїРёСЃСЊ РѕРґРЅРѕРіРѕ СЂРµРіРёСЃС‚СЂР° С…СЂР°РЅРµРЅРёСЏ.
     CmdModbus_06(inPack, outPack);
     break;
-  case 16:		// <16> Запись множества входных регистров.
+  case 8:   // <08> loopback
+    CmdModbus_08(inPack, outPack);
+    break;
+  case 16:		// <16> Р—Р°РїРёСЃСЊ РјРЅРѕР¶РµСЃС‚РІР° РІС…РѕРґРЅС‹С… СЂРµРіРёСЃС‚СЂРѕРІ.
     CmdModbus_16(inPack, outPack);
     break;
   default:
@@ -55,37 +60,37 @@ void analise_modbus(ComMessage* inPack, ComMessage* outPack)
   }
 }
 //------------------------------------------------------------------------------
-//=== <Modbus_03_04> Чтение регистров хранения/Чтение входных регистров ===//
+//=== <Modbus_03_04> Р§С‚РµРЅРёРµ СЂРµРіРёСЃС‚СЂРѕРІ С…СЂР°РЅРµРЅРёСЏ/Р§С‚РµРЅРёРµ РІС…РѕРґРЅС‹С… СЂРµРіРёСЃС‚СЂРѕРІ ===//
 void CmdModbus_03_04(ComMessage* inPack, ComMessage* outPack)
 {
   uint16_t Len, addr;
-  Len = 2*(inPack->data[5]+((uint16_t)inPack->data[4] << 8));		// Количество байт возвращаемых данных, четное.
+  Len = 2*(inPack->data[5]+((uint16_t)inPack->data[4] << 8));		// РљРѕР»РёС‡РµСЃС‚РІРѕ Р±Р°Р№С‚ РІРѕР·РІСЂР°С‰Р°РµРјС‹С… РґР°РЅРЅС‹С…, С‡РµС‚РЅРѕРµ.
   if(Len >= TXRX_BUFFER_SIZE - 3) 
-    Len = TXRX_BUFFER_SIZE-4;		// Предохранитель.
-  addr=((uint16_t)inPack->data[2] << 8) + inPack->data[3];		// Адрес первого читаемого элемента.
-  outPack->data[2] = Len;		// Четное количество байт данных.
-  outPack->length = 3 + Len;		// Длина ответной датаграммы - адрес, функция, количество, данные.
+    Len = TXRX_BUFFER_SIZE-4;		// РџСЂРµРґРѕС…СЂР°РЅРёС‚РµР»СЊ.
+  addr=((uint16_t)inPack->data[2] << 8) + inPack->data[3];		// РђРґСЂРµСЃ РїРµСЂРІРѕРіРѕ С‡РёС‚Р°РµРјРѕРіРѕ СЌР»РµРјРµРЅС‚Р°.
+  outPack->data[2] = Len;		// Р§РµС‚РЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ Р±Р°Р№С‚ РґР°РЅРЅС‹С….
+  outPack->length = 3 + Len;		// Р”Р»РёРЅР° РѕС‚РІРµС‚РЅРѕР№ РґР°С‚Р°РіСЂР°РјРјС‹ - Р°РґСЂРµСЃ, С„СѓРЅРєС†РёСЏ, РєРѕР»РёС‡РµСЃС‚РІРѕ, РґР°РЅРЅС‹Рµ.
   //
   for(int i = 0; i < Len; i += 2)
-  {		// Заполним данные.
+  {		// Р—Р°РїРѕР»РЅРёРј РґР°РЅРЅС‹Рµ.
     if(addr >= MODBUS_HR_SPACE_LAST_ADDR)
       addr = MODBUS_HR_SPACE_LAST_ADDR;
     uint16_t val = MODBUS_HR[addr];
-    *(uint16_t*)&outPack->data[3+i] = SWAP16(val);		// Старший байт - первый.
+    *(uint16_t*)&outPack->data[3+i] = SWAP16(val);		// РЎС‚Р°СЂС€РёР№ Р±Р°Р№С‚ - РїРµСЂРІС‹Р№.
     addr++;
   }
 }
 //------------------------------------------------------------------------------
-//=== <Modbus_06> Запись одного регистра хранения ===//
+//=== <Modbus_06> Р—Р°РїРёСЃСЊ РѕРґРЅРѕРіРѕ СЂРµРіРёСЃС‚СЂР° С…СЂР°РЅРµРЅРёСЏ ===//
 void CmdModbus_06(ComMessage* inPack, ComMessage* outPack)
 {
   uint16_t Len, addr;
   uint8_t rewr = 0;
-  outPack->length = 6;		// Длина ответной датаграммы.
-  addr=((uint16_t)inPack->data[2] << 8) + inPack->data[3];		// Адрес сохраняемого элемента.
+  outPack->length = 6;		// Р”Р»РёРЅР° РѕС‚РІРµС‚РЅРѕР№ РґР°С‚Р°РіСЂР°РјРјС‹.
+  addr=((uint16_t)inPack->data[2] << 8) + inPack->data[3];		// РђРґСЂРµСЃ СЃРѕС…СЂР°РЅСЏРµРјРѕРіРѕ СЌР»РµРјРµРЅС‚Р°.
   if(addr >= MODBUS_HR_SPACE_LAST_ADDR) 
-    addr = MODBUS_HR_SPACE_LAST_ADDR;		// Предохранитель выхода адреса регистра за пределы.
-  uint16_t val = ((uint16_t)inPack->data[4] << 8) + inPack->data[5];		// Сохраняемое значение.
+    addr = MODBUS_HR_SPACE_LAST_ADDR;		// РџСЂРµРґРѕС…СЂР°РЅРёС‚РµР»СЊ РІС‹С…РѕРґР° Р°РґСЂРµСЃР° СЂРµРіРёСЃС‚СЂР° Р·Р° РїСЂРµРґРµР»С‹.
+  uint16_t val = ((uint16_t)inPack->data[4] << 8) + inPack->data[5];		// РЎРѕС…СЂР°РЅСЏРµРјРѕРµ Р·РЅР°С‡РµРЅРёРµ.
   if(addr == MBHR_COMMAND_REG)
   {
     if(val == CMD_WRITE_FLASH_PARAMETERS_BACKUP)
@@ -107,29 +112,35 @@ void CmdModbus_06(ComMessage* inPack, ComMessage* outPack)
   else
     MODBUS_HR[addr]= val;
   for(int i = 1; i < 6; i++) 
-    outPack->data[i] = inPack->data[i];		// Скопируем.
+    outPack->data[i] = inPack->data[i];		// РЎРєРѕРїРёСЂСѓРµРј.
   if(rewr)
   {
     w25_params_write();
   }
 }
 //------------------------------------------------------------------------------
-//=== <Modbus_16> Запись множества входных регистров ===//
+void CmdModbus_08(ComMessage* inPack, ComMessage* outPack)
+{
+  outPack->length = inPack->length-2;
+  memcpy(outPack->data,inPack->data,inPack->length-2);
+}
+//------------------------------------------------------------------------------
+//=== <Modbus_16> Р—Р°РїРёСЃСЊ РјРЅРѕР¶РµСЃС‚РІР° РІС…РѕРґРЅС‹С… СЂРµРіРёСЃС‚СЂРѕРІ ===//
 void CmdModbus_16(ComMessage* inPack, ComMessage* outPack)
 {
   uint16_t addr;
-  outPack->length = 6;		// Длина ответной датаграммы.
-  addr=((uint16_t)inPack->data[2] << 8) + inPack->data[3];		// Адрес первого сохраняемого элемента.
+  outPack->length = 6;		// Р”Р»РёРЅР° РѕС‚РІРµС‚РЅРѕР№ РґР°С‚Р°РіСЂР°РјРјС‹.
+  addr=((uint16_t)inPack->data[2] << 8) + inPack->data[3];		// РђРґСЂРµСЃ РїРµСЂРІРѕРіРѕ СЃРѕС…СЂР°РЅСЏРµРјРѕРіРѕ СЌР»РµРјРµРЅС‚Р°.
   if(addr >= MODBUS_HR_SPACE_LAST_ADDR) 
-    addr = MODBUS_HR_SPACE_LAST_ADDR;		// Предохранитель выхода адреса регистра за пределы.
-  uint16_t cnt = inPack->data[5];		// Количество сохраняемых регистров
+    addr = MODBUS_HR_SPACE_LAST_ADDR;		// РџСЂРµРґРѕС…СЂР°РЅРёС‚РµР»СЊ РІС‹С…РѕРґР° Р°РґСЂРµСЃР° СЂРµРіРёСЃС‚СЂР° Р·Р° РїСЂРµРґРµР»С‹.
+  uint16_t cnt = inPack->data[5];		// РљРѕР»РёС‡РµСЃС‚РІРѕ СЃРѕС…СЂР°РЅСЏРµРјС‹С… СЂРµРіРёСЃС‚СЂРѕРІ
   for(int i = 1; i < 6; i++) 
-    outPack->data[i] = inPack->data[i];		// Скопируем.
+    outPack->data[i] = inPack->data[i];		// РЎРєРѕРїРёСЂСѓРµРј.
   for(int i = 0; i < cnt; i++)
-  {		// Заполним данные.
+  {		// Р—Р°РїРѕР»РЅРёРј РґР°РЅРЅС‹Рµ.
     if(addr >= MODBUS_HR_SPACE_LAST_ADDR) 
-      addr = MODBUS_HR_SPACE_LAST_ADDR;		// Предохранитель выхода адреса регистра за пределы.
-    MODBUS_HR[addr]=((uint16_t)inPack->data[7+2*i]<<8) + inPack->data[8+2*i];		// Очередное сохраняемое значение.     
+      addr = MODBUS_HR_SPACE_LAST_ADDR;		// РџСЂРµРґРѕС…СЂР°РЅРёС‚РµР»СЊ РІС‹С…РѕРґР° Р°РґСЂРµСЃР° СЂРµРіРёСЃС‚СЂР° Р·Р° РїСЂРµРґРµР»С‹.
+    MODBUS_HR[addr]=((uint16_t)inPack->data[7+2*i]<<8) + inPack->data[8+2*i];		// РћС‡РµСЂРµРґРЅРѕРµ СЃРѕС…СЂР°РЅСЏРµРјРѕРµ Р·РЅР°С‡РµРЅРёРµ.     
     addr++;
   }
 }

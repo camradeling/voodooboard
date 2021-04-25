@@ -21,7 +21,7 @@ int main( void )
   Com1RxSemaphore = xSemaphoreCreateCounting(MAX_COM_QUEUE_LENGTH, 0);
   xTaskCreate(vPacketsManagerTask, "Packets_manager", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 2, NULL);
   //xTaskCreate(vI2CTask, "I2C", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
-  xTaskCreate(vInoutsTask, "Inouts", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
+  //xTaskCreate(vInoutsTask, "Inouts", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
   //xTaskCreate(vSpiFlashTask, "Flash", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
   vTaskStartScheduler();
 
@@ -32,9 +32,8 @@ void vInoutsTask (void *pvParameters)
 {
   for(;;)
   {
-    MODBUS_HR[MBHR_DISCRETE_OUTPUTS_LOW] = MODBUS_HR[MBHR_DISCRETE_INPUTS_LOW];
-    MODBUS_HR[MBHR_DISCRETE_OUTPUTS_HIGH] = MODBUS_HR[MBHR_DISCRETE_INPUTS_HIGH];
-    vTaskDelay(10 / portTICK_RATE_MS);
+    //MODBUS_HR[MBHR_DISCRETE_OUTPUTS_LOW] = MODBUS_HR[MBHR_DISCRETE_INPUTS_LOW];
+    vTaskDelay(1000 / portTICK_RATE_MS);
   }
 }
 //------------------------------------------------------------------------------
@@ -42,12 +41,11 @@ void vI2CTask (void *pvParameters)
 {
   for(;;)
   {
-    //read_ads1115();
     //vTaskDelay(1000 / portTICK_RATE_MS);
   }
 }
 //------------------------------------------------------------------------------
-void vApplicationTickHook( void )//вызывается каждую миллисекунду
+void vApplicationTickHook( void )//РІС‹Р·С‹РІР°РµС‚СЃСЏ РєР°Р¶РґСѓСЋ РјРёР»Р»РёСЃРµРєСѓРЅРґСѓ
 {
     //return;
   uint8_t val = 0x00;
@@ -119,7 +117,7 @@ static void prvSetupHardware( void )
   SysTick_CLKSourceConfig( SysTick_CLKSource_HCLK );
   
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
-  //пока что для отладки
+  //РїРѕРєР° С‡С‚Рѕ РґР»СЏ РѕС‚Р»Р°РґРєРё
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);   
   TIM_TimeBaseInitTypeDef timerInitStructure;
   timerInitStructure.TIM_Prescaler = 35;
@@ -130,7 +128,7 @@ static void prvSetupHardware( void )
   TIM_Cmd(TIM3, ENABLE);
   
   if(FLASH->CR & FLASH_CR_LOCK)
-  {// Разблокировка LOCK при необходимости.
+  {// Р Р°Р·Р±Р»РѕРєРёСЂРѕРІРєР° LOCK РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё.
     FLASH->KEYR=FLASH_KEY1;
     FLASH->KEYR=FLASH_KEY2;
     while(FLASH->SR & FLASH_SR_BSY);
@@ -159,7 +157,7 @@ static void prvSetupHardware( void )
   USART_InitStructure.USART_Parity = USART_Parity_No;
   USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
   USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-  //НОги Rx Tx USART1
+  //РќРћРіРё Rx Tx USART1
   SET_PIN_ALTMODE_PP(GPIOA,9);
   SET_PIN_INPUT(GPIOA,10);
   USART_Init(USART1, &USART_InitStructure);
@@ -186,7 +184,7 @@ static void prvSetupHardware( void )
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init( &NVIC_InitStructure );
   //usart tim rx interrupt cc
-  /*NVIC_InitStructure.NVIC_IRQChannel = TIM1_CC_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannel = TIM1_CC_IRQn;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = configLIBRARY_KERNEL_INTERRUPT_PRIORITY;
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0; //Not used as 4 bits are used for the pre-emption priority. 
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
@@ -198,24 +196,24 @@ static void prvSetupHardware( void )
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init( &NVIC_InitStructure );
   //i2c1 interrupt
-  NVIC_InitStructure.NVIC_IRQChannel = I2C1_EV_IRQn;
+  /*NVIC_InitStructure.NVIC_IRQChannel = I2C1_EV_IRQn;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = configLIBRARY_KERNEL_INTERRUPT_PRIORITY;
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0; //Not used as 4 bits are used for the pre-emption priority. 
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init( &NVIC_InitStructure );*/
   
   
-  //все что работает по i2c
+  //РІСЃРµ С‡С‚Рѕ СЂР°Р±РѕС‚Р°РµС‚ РїРѕ i2c
   //i2cAddr = ADC1ADDR;
   //I2C1State = I2C_INITIATING_CONVERSION;
   //recover_I2C1();
-  //I2C1->CR1 |= I2C_CR1_START;//а дальше вся работа в прерывании
+  //I2C1->CR1 |= I2C_CR1_START;//Р° РґР°Р»СЊС€Рµ РІСЃСЏ СЂР°Р±РѕС‚Р° РІ РїСЂРµСЂС‹РІР°РЅРёРё
   
   //BRST
   SET_PIN_HIGH(GPIOA,12);
   SET_PIN_OUTPUT_PP(GPIOA,12);
   uint8_t val = 0x00;
-  //выставляем шину выходами
+  //РІС‹СЃС‚Р°РІР»СЏРµРј С€РёРЅСѓ РІС‹С…РѕРґР°РјРё
 #ifndef NOMAL
   SET_PIN_INPUT(GPIOB,4);
   SET_PIN_INPUT(GPIOB,3);
@@ -234,7 +232,7 @@ static void prvSetupHardware( void )
   SET_PIN_HIGH(OUT_1_PORT, OUT_1);
   SET_PIN_LOW(OUT_2_PORT, OUT_2);
   SET_PIN_HIGH(OUT_2_PORT, OUT_2);
-  //включаем BRST
+  //РІРєР»СЋС‡Р°РµРј BRST
   SET_PIN_LOW(GPIOA,12);
 }
 //------------------------------------------------------------------------------

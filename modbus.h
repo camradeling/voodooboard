@@ -49,6 +49,8 @@ void CmdModbus_03_04(ComMessage* inPack, ComMessage* outPack);
 //------------------------------------------------------------------------------
 void CmdModbus_06(ComMessage* inPack, ComMessage* outPack);
 //------------------------------------------------------------------------------
+void CmdModbus_08(ComMessage* inPack, ComMessage* outPack);
+//------------------------------------------------------------------------------
 void CmdModbus_16(ComMessage* inPack, ComMessage* outPack);
 //------------------------------------------------------------------------------
 #endif /*MODBUS_H*/
