@@ -1,0 +1,6 @@
+[submodule "FreeRTOS"]
+	path = FreeRTOS
+	url = https://github.com/FreeRTOS/FreeRTOS.git
+[submodule "eagle_libs"]
+	path = eagle_libs
+	url = git@github.com:voodoojah/eagle_libs.git
