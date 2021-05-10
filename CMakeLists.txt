@@ -9,21 +9,21 @@ project(voodooboard)
 set(PROJECT_NAME voodooboard)
 
 set(FreeRTOSSources
-        ${PROJECT_SOURCE_DIR}/../FreeRTOS/Source/portable/GCC/ARM_CM3/port.c
-        ${PROJECT_SOURCE_DIR}/../FreeRTOS/Source/queue.c
-        ${PROJECT_SOURCE_DIR}/../FreeRTOS/Source/list.c
-        ${PROJECT_SOURCE_DIR}/../FreeRTOS/Source/timers.c
-        ${PROJECT_SOURCE_DIR}/../FreeRTOS/Source/tasks.c
-        ${PROJECT_SOURCE_DIR}/../FreeRTOS/Source/portable/MemMang/heap_4.c
+        ${PROJECT_SOURCE_DIR}/FreeRTOS-Kernel/portable/GCC/ARM_CM3/port.c
+        ${PROJECT_SOURCE_DIR}/FreeRTOS-Kernel/queue.c
+        ${PROJECT_SOURCE_DIR}/FreeRTOS-Kernel/list.c
+        ${PROJECT_SOURCE_DIR}/FreeRTOS-Kernel/timers.c
+        ${PROJECT_SOURCE_DIR}/FreeRTOS-Kernel/tasks.c
+        ${PROJECT_SOURCE_DIR}/FreeRTOS-Kernel/portable/MemMang/heap_4.c
         )
 
 set(PeripheralSources
-        ${PROJECT_SOURCE_DIR}/../Libraries/STM32F10x_StdPeriph_Driver/src/misc.c
-        ${PROJECT_SOURCE_DIR}/../Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c
-        ${PROJECT_SOURCE_DIR}/../Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_tim.c
-        ${PROJECT_SOURCE_DIR}/../Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c
-        ${PROJECT_SOURCE_DIR}/../Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_dma.c
-        ${PROJECT_SOURCE_DIR}/../Libraries/CMSIS/Device/ST/STM32F10x/Source/Templates/system_stm32f10x.c
+        ${PROJECT_SOURCE_DIR}/Libraries/STM32F10x_StdPeriph_Driver/src/misc.c
+        ${PROJECT_SOURCE_DIR}/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c
+        ${PROJECT_SOURCE_DIR}/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_tim.c
+        ${PROJECT_SOURCE_DIR}/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c
+        ${PROJECT_SOURCE_DIR}/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_dma.c
+        ${PROJECT_SOURCE_DIR}/Libraries/CMSIS/Device/ST/STM32F10x/Source/Templates/system_stm32f10x.c
         )
 
 set(Sources
@@ -53,11 +53,11 @@ set(CMAKE_EXE_LINKER_FLAGS "-T ${PROJECT_SOURCE_DIR}/${LINKER_SCRIPT}")
 set(CMAKE_C_FLAGS "-mcpu=cortex-m3 -mthumb -mno-thumb-interwork -mfpu=vfp -msoft-float -mfix-cortex-m3-ldrd -nostdlib -Wl,-Map,output.map")
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR})
-target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/../FreeRTOS/Source/include)
-target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/../FreeRTOS/Source/portable/GCC/ARM_CM3)
-target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/../Libraries/STM32F10x_StdPeriph_Driver/inc)
-target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/../Libraries/CMSIS/Device/ST/STM32F10x/Include)
-target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/../Libraries/CMSIS/Include)
+target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/FreeRTOS-Kernel/include)
+target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/FreeRTOS-Kernel/portable/GCC/ARM_CM3)
+target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/Libraries/STM32F10x_StdPeriph_Driver/inc)
+target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/Libraries/CMSIS/Device/ST/STM32F10x/Include)
+target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/Libraries/CMSIS/Include)
 
 add_definitions(-DSTM32F10X_MD)
 add_definitions(-DDEBUG)
