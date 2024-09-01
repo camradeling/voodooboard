@@ -162,11 +162,12 @@ void vPacketsManagerTask (void *pvParameters)
       if(num >= MAX_COM_QUEUE_LENGTH)
         num = 0;
       ComMessage* cMesOut = &Com1TxQueue[num];
-      if(process_net_packet(cMesIn, cMesOut) == MODBUS_PACKET_VALID_AND_PROCESSED)
+      if(process_net_packet(cMesIn, cMesOut, MODBUS_RTU_PDU_TYPE) == MODBUS_PACKET_VALID_AND_PROCESSED)
         Com1TxWriteInd = num;
       else
         DMA_USART_prepare_recieve();
     }
+    MODBUS_HR[MBHR_DISCRETE_OUTPUTS_LOW]++;
     if(Com1TxReadInd != Com1TxWriteInd)
     {
       if(!transmitActive)
@@ -179,6 +180,7 @@ void vPacketsManagerTask (void *pvParameters)
           com1TxBuffer[i] = cMesOut->data[i];
         DMA_USART_prepare_transmit(cMesOut->length);
         transmitActive= 1;
+        MODBUS_HR[MBHR_DISCRETE_OUTPUTS_LOW]+=256;
       }
     }
   }

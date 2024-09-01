@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.7)
-
+option(DEBUG_BUILD "debug symbols" OFF)
 message(STATUS "CMAKE_BUILD_TYPE = " ${CMAKE_BUILD_TYPE})
 set(CMAKE_CXX_STANDARD 11)
 message(STATUS "Starting build")
@@ -38,6 +38,7 @@ set(PeripheralSources
 set(Sources
         main.c
         Libraries/modbuslib/modbus.c
+        Libraries/modbuslib/modbus_crc_tables.c
         adc.c
         globals.c
         i2c.c
@@ -51,9 +52,18 @@ set(Sources
 add_executable(${PROJECT_NAME}.elf ${Sources})
 
 set(LINKER_SCRIPT stm32f103md2.ld)
-#set_target_properties(${PROJECT_NAME} PROPERTIES LINK_DEPENDS ${LINKER_SCRIPT})
-#set(CMAKE_EXE_LINKER_FLAGS "-T ${PROJECT_SOURCE_DIR}/${LINKER_SCRIPT}")
-set(CMAKE_C_FLAGS "-mcpu=cortex-m3 -mthumb -mno-thumb-interwork -mfpu=vfp -msoft-float -mfix-cortex-m3-ldrd -nostdlib -Wl,-Map,output.map")
+if(DEBUG_BUILD)
+        message(STATUS "DEBUG ON")
+        SET(CMAKE_C_FLAGS "-mcpu=cortex-m3 -mthumb -mno-thumb-interwork -mfpu=vfp -msoft-float -mfix-cortex-m3-ldrd -g3 -O0 -nostdlib -Wl,-Map,output.map")
+        add_definitions(-DDEBUG)
+        #SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -save-temps")
+else()
+        message(STATUS "DEBUG OFF")
+        SET(CMAKE_C_FLAGS "-mcpu=cortex-m3 -mthumb -mno-thumb-interwork -mfpu=vfp -msoft-float -mfix-cortex-m3-ldrd -O2 -nostdlib -Wl,-Map,output.map")
+endif()
+
+#SET(CMAKE_CXX_FLAGS_INIT "${COMMON_FLAGS}")
+#SET(CMAKE_C_FLAGS_INIT "${COMMON_FLAGS}")
 
 target_include_directories(${PROJECT_NAME}.elf PUBLIC ${PROJECT_SOURCE_DIR})
 target_include_directories(${PROJECT_NAME}.elf PUBLIC ${PROJECT_SOURCE_DIR}/Libraries/modbuslib)
@@ -68,7 +78,6 @@ target_link_options(${PROJECT_NAME}.elf
                 )
 
 add_definitions(-DSTM32F10X_MD)
-add_definitions(-DDEBUG)
 
 #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 #        COMMAND ${CMAKE_OBJCOPY} -O ihex ${PROJECT_NAME} ${PROJECT_NAME}.hex

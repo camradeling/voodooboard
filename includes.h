@@ -26,4 +26,7 @@
 #include "externs.h"
 #include "spi_flash.h"
 //------------------------------------------------------------------------------
+#define FLASH_BACKUP_PARAMS_LEN 4
+#define FLASH_BACKUP_FIRST_ADDR 0
+//------------------------------------------------------------------------------
 #endif/*INCLUDES_H*/
