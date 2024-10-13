@@ -6,25 +6,22 @@
 #include "semphr.h"
 //------------------------------------------------------------------------------
 #define DATA0           8
-#define DATA0_PORT GPIOB
+#define DATA0_PORT      GPIOB
 #define DATA1           9
-#define DATA1_PORT GPIOB
+#define DATA1_PORT      GPIOB
 #define DATA2           10
-#define DATA2_PORT GPIOB
+#define DATA2_PORT      GPIOB
 #define DATA3           11
-#define DATA3_PORT GPIOB
+#define DATA3_PORT      GPIOB
 #define DATA4           12
-#define DATA4_PORT GPIOB
+#define DATA4_PORT      GPIOB
 #define DATA5           13
-#define DATA5_PORT GPIOB
+#define DATA5_PORT      GPIOB
 #define DATA6           14
-#define DATA6_PORT GPIOB
+#define DATA6_PORT      GPIOB
 #define DATA7           15
-#define DATA7_PORT GPIOB
+#define DATA7_PORT      GPIOB
 //------------------------------------------------------------------------------
-//#define IN_KEY 6
-//#define IN_KEY_PORT GPIOC
-
 // workaround while the board is broken
 #define OUT_1 6
 #define OUT_1_PORT GPIOA
@@ -40,9 +37,6 @@
 #define IN_1_PORT GPIOA
 #define IN_2 11
 #define IN_2_PORT GPIOA
-
-//#define SYN_SCAN 2
-//#define SYN_SCAN_PORT GPIOD
 //------------------------------------------------------------------------------
 #define mainCOM_TASK_PRIORITY			( tskIDLE_PRIORITY + 1 )
 #define INIT_BAUDRATE BAUDRATE_115200
@@ -58,21 +52,49 @@
 //------------------------------------------------------------------------------
 #define REBOOT()   SCB->AIRCR = 0x05FA0000 | (u32)0x04                                     
 //------------------------------------------------------------------------------
-#define SET_PIN_HIGH(PORT,PIN) PORT->ODR |= (1 << PIN);
-
-#define SET_PIN_LOW(PORT,PIN)  PORT->ODR &=~(1 << PIN);
-
-#define SET_PIN_OUTPUT_PP(PORT,PIN) if(PIN>=8) {PORT->CRH&=~(0x0f<<((PIN-8) << 2));PORT->CRH|=(0x03<<((PIN-8) << 2));}else{PORT->CRL&=~(0x0f<<(PIN << 2));PORT->CRL|=(0x03<<(PIN << 2));}
-
-#define SET_PIN_OUTPUT_OD(PORT,PIN) if(PIN >= 8){ PORT->CRH &=~ (0x0f << ((PIN - 8) << 2)); PORT->CRH |= (0x07 << ((PIN - 8) << 2));} \
-                                            else{ PORT->CRL &=~ (0x0f << (PIN << 2)); PORT->CRL |= (0x07 << (PIN << 2));}
-
-#define SET_PIN_INPUT(PORT,PIN) if(PIN >= 8){ PORT->CRH &=~ (0x0f << ((PIN - 8) << 2)); PORT->CRH |= (0x04 << ((PIN - 8) << 2));} \
-                                            else{ PORT->CRL &=~ (0x0f << (PIN << 2)); PORT->CRL |= (0x04 << (PIN << 2));}
-
-#define SET_PIN_ALTMODE_PP(PORT,PIN) if(PIN >= 8){ PORT->CRH &=~ (0x0f << ((PIN - 8) << 2)); PORT->CRH |= (0x0B << ((PIN - 8) << 2));} \
-                                            else{ PORT->CRL &=~ (0x0f << (PIN << 2)); PORT->CRL |= (0x0B << (PIN << 2));}
-
+#define SET_PIN_HIGH(PORT,PIN) { PORT->ODR |= (1 << PIN); }
+#define SET_PIN_LOW(PORT,PIN)  { PORT->ODR &=~(1 << PIN); }
+#define SET_PIN_OUTPUT_PP(PORT,PIN) { \
+                                        if(PIN>=8) { \
+                                            PORT->CRH&=~((uint32_t)0x0f<<((PIN%8) << 2)); \
+                                            PORT->CRH|=((uint32_t)0x03<<((PIN%8) << 2)); \
+                                        } \
+                                        else { \
+                                            PORT->CRL&=~((uint32_t)0x0f<<((PIN%8) << 2)); \
+                                            PORT->CRL|=((uint32_t)0x03<<((PIN%8) << 2)); \
+                                        } \
+                                    }
+#define SET_PIN_OUTPUT_OD(PORT,PIN) { \
+                                        if(PIN >= 8) { \
+                                            PORT->CRH &=~ ((uint32_t)0x0f << ((PIN%8) << 2)); \
+                                            PORT->CRH |= ((uint32_t)0x07 << ((PIN%8) << 2)); \
+                                        } \
+                                        else { \
+                                            PORT->CRL &=~ ((uint32_t)0x0f << ((PIN%8) << 2)); \
+                                            PORT->CRL |= ((uint32_t)0x07 << ((PIN%8) << 2)); \
+                                        } \
+                                    }
+#define SET_PIN_INPUT(PORT,PIN) { \
+                                    if(PIN >= 8) { \
+                                        PORT->CRH &=~ ((uint32_t)0x0f << ((PIN%8) << 2)); \
+                                        PORT->CRH |= ((uint32_t)0x04 << ((PIN%8) << 2)); \
+                                    } \
+                                    else { \
+                                        PORT->CRL &=~ ((uint32_t)0x0f << ((PIN%8) << 2)); \
+                                        PORT->CRL |= ((uint32_t)0x04 << ((PIN%8) << 2)); \
+                                    } \
+                                }
+#define SET_PIN_ALTMODE_PP(PORT,PIN)    { \
+                                            if(PIN >= 8) { \
+                                                PORT->CRH &=~ ((uint32_t)0x0f << ((PIN%8) << 2)); \
+                                                PORT->CRH |= ((uint32_t)0x0B << ((PIN%8) << 2)); \
+                                            } \
+                                            else { \
+                                                PORT->CRL &=~ ((uint32_t)0x0f << ((PIN%8) << 2)); \
+                                                PORT->CRL |= ((uint32_t)0x0B << ((PIN%8) << 2)); \
+                                            } \
+                                        }
+#define ISHIGH(PORT,PIN) ((PORT->ODR & (1 << PIN)) ? 1 : 0)
 #define SET_BUS_VAL(val)        if(val & (1 << 0)) {SET_PIN_HIGH(DATA0_PORT,DATA0);}else {SET_PIN_LOW(DATA0_PORT,DATA0);} \
                                 if(val & (1 << 1)) {SET_PIN_HIGH(DATA1_PORT,DATA1);}else {SET_PIN_LOW(DATA1_PORT,DATA1);} \
                                 if(val & (1 << 2)) {SET_PIN_HIGH(DATA2_PORT,DATA2);}else {SET_PIN_LOW(DATA2_PORT,DATA2);} \
