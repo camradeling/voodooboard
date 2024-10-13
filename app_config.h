@@ -23,20 +23,20 @@
 #define DATA7_PORT      GPIOB
 //------------------------------------------------------------------------------
 // workaround while the board is broken
-#define OUT_1 6
-#define OUT_1_PORT GPIOA
-#define OUT_2 4
-#define OUT_2_PORT GPIOA
+#define OUT_1           6
+#define OUT_1_PORT      GPIOA
+#define OUT_2           4
+#define OUT_2_PORT      GPIOA
 
-/*#define OUT_1 3
-#define OUT_1_PORT GPIOB
-#define OUT_2 4
-#define OUT_2_PORT GPIOB*/
+/*#define OUT_1         3
+#define OUT_1_PORT      GPIOB
+#define OUT_2           4
+#define OUT_2_PORT      GPIOB*/
 
-#define IN_1 8
-#define IN_1_PORT GPIOA
-#define IN_2 11
-#define IN_2_PORT GPIOA
+#define IN_1            8
+#define IN_1_PORT       GPIOA
+#define IN_2            11
+#define IN_2_PORT       GPIOA
 //------------------------------------------------------------------------------
 #define mainCOM_TASK_PRIORITY			( tskIDLE_PRIORITY + 1 )
 #define INIT_BAUDRATE BAUDRATE_115200
@@ -95,15 +95,16 @@
                                             } \
                                         }
 #define ISHIGH(PORT,PIN) ((PORT->ODR & (1 << PIN)) ? 1 : 0)
-#define SET_BUS_VAL(val)        if(val & (1 << 0)) {SET_PIN_HIGH(DATA0_PORT,DATA0);}else {SET_PIN_LOW(DATA0_PORT,DATA0);} \
-                                if(val & (1 << 1)) {SET_PIN_HIGH(DATA1_PORT,DATA1);}else {SET_PIN_LOW(DATA1_PORT,DATA1);} \
-                                if(val & (1 << 2)) {SET_PIN_HIGH(DATA2_PORT,DATA2);}else {SET_PIN_LOW(DATA2_PORT,DATA2);} \
-                                if(val & (1 << 3)) {SET_PIN_HIGH(DATA3_PORT,DATA3);}else {SET_PIN_LOW(DATA3_PORT,DATA3);} \
-                                if(val & (1 << 4)) {SET_PIN_HIGH(DATA4_PORT,DATA4);}else {SET_PIN_LOW(DATA4_PORT,DATA4);} \
-                                if(val & (1 << 5)) {SET_PIN_HIGH(DATA5_PORT,DATA5);}else {SET_PIN_LOW(DATA5_PORT,DATA5);} \
-                                if(val & (1 << 6)) {SET_PIN_HIGH(DATA6_PORT,DATA6);}else {SET_PIN_LOW(DATA6_PORT,DATA6);} \
-                                if(val & (1 << 7)) {SET_PIN_HIGH(DATA7_PORT,DATA7);}else {SET_PIN_LOW(DATA7_PORT,DATA7);} 
-
+#define SET_BUS_VAL(val)        { \
+                                    if(val & (1 << 0)) {SET_PIN_HIGH(DATA0_PORT,DATA0);}else {SET_PIN_LOW(DATA0_PORT,DATA0);} \
+                                    if(val & (1 << 1)) {SET_PIN_HIGH(DATA1_PORT,DATA1);}else {SET_PIN_LOW(DATA1_PORT,DATA1);} \
+                                    if(val & (1 << 2)) {SET_PIN_HIGH(DATA2_PORT,DATA2);}else {SET_PIN_LOW(DATA2_PORT,DATA2);} \
+                                    if(val & (1 << 3)) {SET_PIN_HIGH(DATA3_PORT,DATA3);}else {SET_PIN_LOW(DATA3_PORT,DATA3);} \
+                                    if(val & (1 << 4)) {SET_PIN_HIGH(DATA4_PORT,DATA4);}else {SET_PIN_LOW(DATA4_PORT,DATA4);} \
+                                    if(val & (1 << 5)) {SET_PIN_HIGH(DATA5_PORT,DATA5);}else {SET_PIN_LOW(DATA5_PORT,DATA5);} \
+                                    if(val & (1 << 6)) {SET_PIN_HIGH(DATA6_PORT,DATA6);}else {SET_PIN_LOW(DATA6_PORT,DATA6);} \
+                                    if(val & (1 << 7)) {SET_PIN_HIGH(DATA7_PORT,DATA7);}else {SET_PIN_LOW(DATA7_PORT,DATA7);} \
+                                } 
 #define GET_BUS_VAL()           (uint8_t)(((DATA0_PORT->IDR & (1 << DATA0))?(0 << 0):(1 << 0))| \
                                           ((DATA1_PORT->IDR & (1 << DATA1))?(0 << 1):(1 << 1))| \
                                           ((DATA2_PORT->IDR & (1 << DATA2))?(0 << 2):(1 << 2))| \
@@ -112,24 +113,26 @@
                                           ((DATA5_PORT->IDR & (1 << DATA5))?(0 << 5):(1 << 5))| \
                                           ((DATA6_PORT->IDR & (1 << DATA6))?(0 << 6):(1 << 6))| \
                                           ((DATA7_PORT->IDR & (1 << DATA7))?(0 << 7):(1 << 7)))
-
-#define SET_BUS_OUTPUT_PP() SET_PIN_OUTPUT_PP(DATA0_PORT,DATA0); \
-                            SET_PIN_OUTPUT_PP(DATA1_PORT,DATA1); \
-                            SET_PIN_OUTPUT_PP(DATA2_PORT,DATA2); \
-                            SET_PIN_OUTPUT_PP(DATA3_PORT,DATA3); \
-                            SET_PIN_OUTPUT_PP(DATA4_PORT,DATA4); \
-                            SET_PIN_OUTPUT_PP(DATA5_PORT,DATA5); \
-                            SET_PIN_OUTPUT_PP(DATA6_PORT,DATA6); \
-                            SET_PIN_OUTPUT_PP(DATA7_PORT,DATA7);
-                            
-#define SET_BUS_INPUT()     SET_PIN_INPUT(DATA0_PORT,DATA0); \
-                            SET_PIN_INPUT(DATA1_PORT,DATA1); \
-                            SET_PIN_INPUT(DATA2_PORT,DATA2); \
-                            SET_PIN_INPUT(DATA3_PORT,DATA3); \
-                            SET_PIN_INPUT(DATA4_PORT,DATA4); \
-                            SET_PIN_INPUT(DATA5_PORT,DATA5); \
-                            SET_PIN_INPUT(DATA6_PORT,DATA6); \
-                            SET_PIN_INPUT(DATA7_PORT,DATA7);
+#define SET_BUS_OUTPUT_PP()  { \
+                                SET_PIN_OUTPUT_PP(DATA0_PORT,DATA0); \
+                                SET_PIN_OUTPUT_PP(DATA1_PORT,DATA1); \
+                                SET_PIN_OUTPUT_PP(DATA2_PORT,DATA2); \
+                                SET_PIN_OUTPUT_PP(DATA3_PORT,DATA3); \
+                                SET_PIN_OUTPUT_PP(DATA4_PORT,DATA4); \
+                                SET_PIN_OUTPUT_PP(DATA5_PORT,DATA5); \
+                                SET_PIN_OUTPUT_PP(DATA6_PORT,DATA6); \
+                                SET_PIN_OUTPUT_PP(DATA7_PORT,DATA7); \
+                            }
+#define SET_BUS_INPUT()     { \
+                                SET_PIN_INPUT(DATA0_PORT,DATA0); \
+                                SET_PIN_INPUT(DATA1_PORT,DATA1); \
+                                SET_PIN_INPUT(DATA2_PORT,DATA2); \
+                                SET_PIN_INPUT(DATA3_PORT,DATA3); \
+                                SET_PIN_INPUT(DATA4_PORT,DATA4); \
+                                SET_PIN_INPUT(DATA5_PORT,DATA5); \
+                                SET_PIN_INPUT(DATA6_PORT,DATA6); \
+                                SET_PIN_INPUT(DATA7_PORT,DATA7); \
+                            }
 //------------------------------------------------------------------------------
 #define GPIO_TO_INT(GPIO) (((uint32_t)(&(GPIO->CRL)) - GPIOA_BASE)>>10);
 //------------------------------------------------------------------------------
