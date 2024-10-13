@@ -9,8 +9,6 @@ static void vInoutsTask (void *pvParameters);
 //------------------------------------------------------------------------------
 void vApplicationTickHook( void );
 //------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
 int main( void )
 {
 /*#ifdef DEBUG
@@ -47,27 +45,26 @@ void vI2CTask (void *pvParameters)
 //------------------------------------------------------------------------------
 void vApplicationTickHook( void )//вызывается каждую миллисекунду
 {
-    //return;
-  uint8_t val = 0x00;
-  SET_BUS_OUTPUT_PP();
-  val = MODBUS_HR[MBHR_DISCRETE_OUTPUTS_LOW] & 0x00ff;
-  SET_BUS_VAL(val);
-  SET_PIN_LOW(OUT_1_PORT, OUT_1);
-  SET_PIN_HIGH(OUT_1_PORT, OUT_1);
-  val = (MODBUS_HR[MBHR_DISCRETE_OUTPUTS_LOW] & 0xff00) >> 8;
-  SET_BUS_VAL(val);
-  SET_PIN_LOW(OUT_2_PORT, OUT_2);
-  SET_PIN_HIGH(OUT_2_PORT, OUT_2);
+    uint8_t val = 0x00;
+    SET_BUS_OUTPUT_PP();
+    val = MODBUS_HR[MBHR_DISCRETE_OUTPUTS_LOW] & 0x00ff;
+    SET_BUS_VAL(val);
+    SET_PIN_LOW(OUT_1_PORT, OUT_1);
+    SET_PIN_HIGH(OUT_1_PORT, OUT_1);
+    val = (MODBUS_HR[MBHR_DISCRETE_OUTPUTS_LOW] & 0xff00) >> 8;
+    SET_BUS_VAL(val);
+    SET_PIN_LOW(OUT_2_PORT, OUT_2);
+    SET_PIN_HIGH(OUT_2_PORT, OUT_2);
 
-  SET_BUS_INPUT();
-  SET_PIN_LOW(IN_1_PORT, IN_1);
-  val = GET_BUS_VAL();
-  SET_PIN_HIGH(IN_1_PORT, IN_1);
-  MODBUS_HR[MBHR_DISCRETE_INPUTS_LOW] = (MODBUS_HR[MBHR_DISCRETE_INPUTS_LOW] & 0xff00) | val;
-  SET_PIN_LOW(IN_2_PORT, IN_2);
-  val = GET_BUS_VAL();
-  SET_PIN_HIGH(IN_2_PORT, IN_2);
-  MODBUS_HR[MBHR_DISCRETE_INPUTS_LOW] = (MODBUS_HR[MBHR_DISCRETE_INPUTS_LOW] & 0x00ff) | (uint16_t)((uint16_t)val << 8);
+    SET_BUS_INPUT();
+    SET_PIN_LOW(IN_1_PORT, IN_1);
+    val = GET_BUS_VAL();
+    SET_PIN_HIGH(IN_1_PORT, IN_1);
+    MODBUS_HR[MBHR_DISCRETE_INPUTS_LOW] = (MODBUS_HR[MBHR_DISCRETE_INPUTS_LOW] & 0xff00) | val;
+    SET_PIN_LOW(IN_2_PORT, IN_2);
+    val = GET_BUS_VAL();
+    SET_PIN_HIGH(IN_2_PORT, IN_2);
+    MODBUS_HR[MBHR_DISCRETE_INPUTS_LOW] = (MODBUS_HR[MBHR_DISCRETE_INPUTS_LOW] & 0x00ff) | (uint16_t)((uint16_t)val << 8);
 }
 //------------------------------------------------------------------------------
 static void prvSetupHardware( void )
@@ -138,18 +135,6 @@ static void prvSetupHardware( void )
   SET_PIN_OUTPUT_PP(GPIOB,5);
   SET_PIN_HIGH(GPIOB,5);
   
-  //SPI init
-  //SET_PIN_HIGH(GPIOA,4);
-  //SET_PIN_OUTPUT_PP(GPIOA,4);//NSS
-  ////SET_PIN_ALTMODE_PP(GPIOA,5);//SCK
-  //SET_PIN_INPUT(GPIOA,6);//MISO
-  //SET_PIN_ALTMODE_PP(GPIOA,7);//MOSI
-  //SPI1->CR1 &=~SPI_CR1_SPE;
-  //SPI1->CR1 = 0x00000004;//8-bit master second rising edge sampling baudrate 36 mhz
-  //SPI1->CR2 |= SPI_CR2_SSOE;
-  //SPI1->CR1 |= SPI_CR1_SPE;//turn on spi
-  //w25_init();
-  
   USART_InitTypeDef USART_InitStructure;
   USART_InitStructure.USART_BaudRate = INIT_BAUDRATE;
   USART_InitStructure.USART_WordLength = USART_WordLength_8b;
@@ -195,33 +180,14 @@ static void prvSetupHardware( void )
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0; //Not used as 4 bits are used for the pre-emption priority. 
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init( &NVIC_InitStructure );
-  //i2c1 interrupt
-  /*NVIC_InitStructure.NVIC_IRQChannel = I2C1_EV_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = configLIBRARY_KERNEL_INTERRUPT_PRIORITY;
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0; //Not used as 4 bits are used for the pre-emption priority. 
-  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_Init( &NVIC_InitStructure );*/
-  
-  
-  //все что работает по i2c
-  //i2cAddr = ADC1ADDR;
-  //I2C1State = I2C_INITIATING_CONVERSION;
-  //recover_I2C1();
-  //I2C1->CR1 |= I2C_CR1_START;//а дальше вся работа в прерывании
   
   //BRST
   SET_PIN_HIGH(GPIOA,12);
   SET_PIN_OUTPUT_PP(GPIOA,12);
   uint8_t val = 0x00;
   //выставляем шину выходами
-#ifndef NOMAL
-  SET_PIN_INPUT(GPIOB,4);
-  SET_PIN_INPUT(GPIOB,3);
-#endif
   SET_PIN_OUTPUT_PP(OUT_1_PORT, OUT_1);
   SET_PIN_OUTPUT_PP(OUT_2_PORT, OUT_2);
-    //SET_PIN_LOW(OUT_1_PORT,OUT_1);
-    //SET_PIN_LOW(OUT_2_PORT,OUT_2);
   SET_PIN_HIGH(IN_1_PORT, IN_1);
   SET_PIN_OUTPUT_PP(IN_1_PORT, IN_1);
   SET_PIN_HIGH(IN_2_PORT, IN_2);
@@ -245,3 +211,5 @@ void assert_failed( unsigned char* pcFile, unsigned long ulLine )
 	}
 }
 #endif
+//------------------------------------------------------------------------------
+

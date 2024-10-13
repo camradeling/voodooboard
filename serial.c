@@ -167,7 +167,7 @@ void vPacketsManagerTask (void *pvParameters)
       else
         DMA_USART_prepare_recieve();
     }
-    MODBUS_HR[MBHR_DISCRETE_OUTPUTS_LOW]++;
+
     if(Com1TxReadInd != Com1TxWriteInd)
     {
       if(!transmitActive)
@@ -180,7 +180,6 @@ void vPacketsManagerTask (void *pvParameters)
           com1TxBuffer[i] = cMesOut->data[i];
         DMA_USART_prepare_transmit(cMesOut->length);
         transmitActive= 1;
-        MODBUS_HR[MBHR_DISCRETE_OUTPUTS_LOW]+=256;
       }
     }
   }

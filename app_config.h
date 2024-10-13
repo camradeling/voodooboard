@@ -24,20 +24,23 @@
 //------------------------------------------------------------------------------
 //#define IN_KEY 6
 //#define IN_KEY_PORT GPIOC
+
+// workaround while the board is broken
 #define OUT_1 6
 #define OUT_1_PORT GPIOA
 #define OUT_2 4
 #define OUT_2_PORT GPIOA
-//#define OUT_3 9
-//#define OUT_3_PORT GPIOC
-//#define OUT_4 5
-//#define OUT_4_PORT GPIOC
+
+/*#define OUT_1 3
+#define OUT_1_PORT GPIOB
+#define OUT_2 4
+#define OUT_2_PORT GPIOB*/
+
 #define IN_1 8
 #define IN_1_PORT GPIOA
 #define IN_2 11
 #define IN_2_PORT GPIOA
-//#define IN_3 12
-//#define IN_3_PORT GPIOC
+
 //#define SYN_SCAN 2
 //#define SYN_SCAN_PORT GPIOD
 //------------------------------------------------------------------------------
